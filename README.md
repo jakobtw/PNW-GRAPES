@@ -4,11 +4,18 @@ GRAPES.jl is a Julia-language code for earthquake early warning, I am using it t
 ## Overview
 This project is using the GRAPES graph nerual network model made by Tim Clements for the U.S. Geological Survey found [here.](https://code.usgs.gov/esc/grapes.jl) This model can be used in real time with sesimic stations to predict peak ground acceleration (PGA), as an earthquake starts to rupture for earthquake early warning systems (EEWS). This repository shows how to pull Pacific Northwest sesimic events and use GRAPES to predict the PGA, to ultimately see how the model can be applied in other areas it was not trained on.
 
-## Acquirng Seismic Data
-To run GRAPES you need three objects. a `GNNGraph` and three vectors `distance_from_earthquake`, `lon`, `lat`. These are dependant on what station you are gathering the event from. To get this information we are using a specific SeisIO package, install this by running
+## Installation
+First we need to install a specific version of SeisIO
 ```julia
 pkg> add https://github.com/tclements/SeisIO.jl.git
 ```
+Then to install GRAPES
+```julia
+pkg> add https://code.usgs.gov/esc/grapes.jl.git
+```
+
+## Acquirng Seismic Data
+To run GRAPES you need three objects. a `GNNGraph` and three vectors `distance_from_earthquake`, `lon`, `lat`. These are dependant on what station you are gathering the event from. We will be using SeisIO to download the data for GRAPES to run.
 
 ### Finding an event
 We will be getting the [2019 M4.6 earthquake waveform that occured near Roosevelt, Washington](https://earthquake.usgs.gov/earthquakes/eventpage/uw61535372/executive). From the USGS website we can see what stations caputed the event, for this tutorial I will be using the Everett Gateway Middle School station (EVGW).

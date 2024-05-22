@@ -27,25 +27,34 @@ SeisIO documentation can be found [here.](https://seisio.readthedocs.io/en/lates
 ```julia
 using SeisIO
 
-# Get the start and end time in UTC
+# Get the start and end time in UTC for the event 
 ts = "2019-07-12T09:50:00" #time start
 te = "2019-07-12T09:53:00" #time end
 
-# Get the seisdata "S", downloading from FDSN, taking by a UW station named EVGW, from IRIS server
-S = get_data("FDSN","UW.EVGW.",src="IRIS", s=ts,t=te, detrend=false, rr=false, w= true, autoname=true)
-SeisBase.findchan("ENN", S) #This finds the specific channel to index
-#This gets us the lat, lon, and depth of the event
-lat = S.loc[2].lat
-loc = S.loc[2].lon
-dep = S.loc[2].dep
+# Get the seisdata "S", downloading from FDSN, taking by a UW stations, from IRIS server
+S1 = get_data("FDSN","UW.EVGW.",src="IRIS", s=ts,t=te, detrend=false, rr=false, w= true, autoname=true)
+S2 = get_data("FDSN", "UW.LEOT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
+S3 = get_data("FDSN", "UW.TOLT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
+S4 = get_data("FDSN", "UW.QBRO", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
+S5 = get_data("FDSN", "UW.BEVT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
+S6 = get_data("FDSN", "UW.EARN", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
+S7 = get_data("FDSN", "UW.MS99", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
+
 ```
-We then need to convert the SeisChannel into SeisData which can be done by
+GRAPES uses multiple channels for its prediction. The more the better! With this pull we currently have 21 channels split into 7 different SeisData objects, so for convience we will push them all into 1 object "S"!
+
 ```julia
-#pull specific channel out
-C = pull(S,2)
-#turn the channel into seisdata format
-D = SeisData(C)
+#Push all the channels into one
+S = SeisData(S1, S2, S3, S4, S5, S6, S7)
 ```
+Now the model needs some parameters for the event. The numbers are taken from GRAPES' test procedure.
+```julia
+#Source parameters for M4.6 Roosevelt, WA EQ
+origin_time = DateTime(2019, 7, 12, 9, 51, 38)
+event_location = EQLoc(lat= 47.873, lon= 122.016, dep=28.8)
+sample_time = origin_time + Second(6)
+```
+
 
 ## Publications
 T. Clements et al (Paper is not published yet)

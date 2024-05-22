@@ -1,8 +1,10 @@
 [deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 GRAPES = "ad6326b3-f62c-4d40-9899-5d49f7bb4905"
+GeoJSON = "61d90e0f-e114-555e-ac52-39dfb47a3ef9"
+GeoMakie = "db073c08-6b98-4ee5-b6a4-5efafb3259c6"
 GraphNeuralNetworks = "cffab07f-9bc2-4db1-8861-388f63bf7694"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
-Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Scratch = "6c6a2e73-6563-6170-7368-637461726353"
 SeisIO = "b372bb87-02dd-52bb-bcf6-c30dd83fd342"

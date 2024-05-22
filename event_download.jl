@@ -1,4 +1,4 @@
-using SeisIO, Dates
+using SeisIO, Dates, GRAPES, CairoMakie, GeoMakie, GeoJSON
 
 ts = "2019-07-12T09:50:00" #time start
 te = "2019-07-12T09:53:00" #time end
@@ -15,32 +15,17 @@ S7 = get_data("FDSN", "UW.MS99", src="IRIS", s=ts, t=te, detrend=false, rr=false
 #Push all the channels into one
 S = SeisData(S1, S2, S3, S4, S5, S6, S7)
 
-#This finds the specific channel to index for plotting
-SeisIO.findchan("ENN", S)
-
-
-using Plots
-#Plot to see if same
-Plots.plot(S[2].x, label="ENN", legend=:topleft, title="Seismic Station UW.EVGW", xlabel="Time (s)", ylabel="Amplitude")
-Plots.plot(S5[2].x, label="ENN", legend=:topleft, title="Seismic Station UW.EVGW", xlabel="Time (s)", ylabel="Amplitude")
-
-
-
 #Source parameters for M4.6 Roosevelt, WA EQ
 origin_time = DateTime(2019, 7, 12, 9, 51, 38)
 event_location = EQLoc(lat= 47.873, lon= 122.016, dep=28.8)
 sample_time = origin_time + Second(6) #this is from GRAPES example, not sure how much time is needed
 
-#set up graph for model
-using GRAPES
 #this graph set up is from the example in the GRAPES repo
 rawT = 4.0 # second of input window
 predictT= 60.0 # seconds to extract future PGA
 k = 5 # nearest neighbors when i did 20 it gave me (k < Nrows)
 maxdist = 30000.0 # meters (meters from or of what?)
 logpga = true # return try PGA in log10(pga [cm/s^2])
-
-length(D.x[1]) #I am getting K< Nrows but is the length of the data nrows? need to see with Tim
 
 g, distance_from_earthquake, lon, lat = generate_graph(
         S, 
@@ -60,3 +45,24 @@ g, distance_from_earthquake, lon, lat = generate_graph(
     prediction = model(g)
     vec(prediction.ndata.x) .- vec(g.gdata.u)
     #Need to now understand amount of error, plotting error, pulling more stations?
+
+
+# load the state boundary data given by Steven Walters
+state = GeoJSON.read(read(".\\PNW-GRAPES\\wa_state_bnd.json", String))
+
+# Establish the canvas for plotting
+fig = Figure()
+ga = GeoAxis(
+    fig[1, 1]; 
+    dest = "+proj=comill", title ="GRAPES Prediction")
+    
+poly!(ga, state; strokewidth = 0.7, color=:green, rasterize = 5)
+
+#plot station data
+for i in 1:length(S)
+    x = S.loc[i].lon
+    y = S.loc[i].lat
+    scatter!(ga, x, y, color=:red, markersize=10, marker=:circle, label = "Station", rasterize = 5)
+end
+fig
+

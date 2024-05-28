@@ -1,6 +1,6 @@
-using SeisIO, Dates, GRAPES, CairoMakie, GeoMakie, GeoJSON
+using SeisIO, Dates, GRAPES, CairoMakie, GeoMakie, GeoJSON, GraphNeuralNetworks
 
-ts = "2019-07-12T09:50:00" #time start
+ts = "2019-07-12T09:51:00" #time start
 te = "2019-07-12T09:53:00" #time end
 
 #pull data from station as S1...S6 to get more than 20 channels
@@ -27,6 +27,7 @@ k = 5 # nearest neighbors when i did 20 it gave me (k < Nrows)
 maxdist = 30000.0 # meters (meters from or of what?)
 logpga = true # return try PGA in log10(pga [cm/s^2])
 
+#single prediction run
 g, distance_from_earthquake, lon, lat = generate_graph(
         S, 
         rawT, 
@@ -44,7 +45,37 @@ g, distance_from_earthquake, lon, lat = generate_graph(
 
     prediction = model(g)
     vec(prediction.ndata.x) .- vec(g.gdata.u)
-    #Need to now understand amount of error, plotting error, pulling more stations?
+    
+
+
+
+
+#For loop to run predictions
+# Calculate the difference in seconds
+time_start = DateTime(ts, "yyyy-mm-ddTHH:MM:SS")
+time_end = DateTime(te, "yyyy-mm-ddTHH:MM:SS")
+difference_in_seconds = Dates.value(Dates.Second(time_end - time_start))
+#120/4 = 30 so we need 30 GNN graphs
+input_graphs = Array{GNNGraph}(undef, 30)
+N = length(input_graphs)
+preds = Array{GNNGraph}(undef, N)
+for ii in 1:N
+    sample_time = origin_time + Second(ii*2)
+    g, distance_from_earthquake, lon, lat = generate_graph(
+        S, 
+        rawT, 
+        predictT, 
+        event_location, 
+        sample_time, 
+        k=k, 
+        maxdist=maxdist, 
+        logpga=logpga, 
+    )
+    input_graphs[ii] = g
+    preds[ii] = model(input_graphs[ii])
+end
+preds[30]
+vec(preds[30].ndata.x) .- vec(input_graphs[30].gdata.u)
 
 
 # load the state boundary data given by Steven Walters

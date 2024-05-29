@@ -1,16 +1,16 @@
-using SeisIO, Dates, GRAPES, CairoMakie, GeoMakie, GeoJSON, GraphNeuralNetworks
+using SeisIO, Dates, GRAPES, CairoMakie, GeoMakie, GeoJSON, GraphNeuralNetworks, Plots, Makie
 
 ts = "2019-07-12T09:51:00" #time start
-te = "2019-07-12T09:53:00" #time end
+te = "2019-07-12T09:53:30" #time end
 
 #pull data from station as S1...S6 to get more than 20 channels
-S1 = get_data("FDSN","UW.EVGW.",src="IRIS", s=ts,t=te, detrend=false, rr=false, w= true, autoname=true)
-S2 = get_data("FDSN", "UW.LEOT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S3 = get_data("FDSN", "UW.TOLT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S4 = get_data("FDSN", "UW.QBRO", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S5 = get_data("FDSN", "UW.BEVT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S6 = get_data("FDSN", "UW.EARN", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S7 = get_data("FDSN", "UW.MS99", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
+S1 = get_data("FDSN","UW.EVGW.",src="IRIS", s=ts,t=te, detrend=true, rr=false, w= true, autoname=true)
+S2 = get_data("FDSN", "UW.LEOT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S3 = get_data("FDSN", "UW.TOLT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S4 = get_data("FDSN", "UW.QBRO", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S5 = get_data("FDSN", "UW.BEVT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S6 = get_data("FDSN", "UW.EARN", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S7 = get_data("FDSN", "UW.MS99", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 
 #Push all the channels into one
 S = SeisData(S1, S2, S3, S4, S5, S6, S7)
@@ -75,7 +75,9 @@ for ii in 1:N
     preds[ii] = model(input_graphs[ii])
 end
 preds[30]
-vec(preds[30].ndata.x) .- vec(input_graphs[30].gdata.u)
+vec(preds[20].ndata.x) .- vec(input_graphs[20].gdata.u)
+preds[20].ndata.x
+input_graphs[20].gdata.u
 
 
 # load the state boundary data given by Steven Walters
@@ -88,12 +90,18 @@ ga = GeoAxis(
     dest = "+proj=comill", title ="GRAPES Prediction")
     
 poly!(ga, state; strokewidth = 0.7, color=:green, rasterize = 5)
-
+S
 #plot station data
 for i in 1:length(S)
     x = S.loc[i].lon
     y = S.loc[i].lat
-    scatter!(ga, x, y, color=:red, markersize=10, marker=:circle, label = "Station", rasterize = 5)
+    Makie.scatter!(ga, x, y, color=:red, markersize=10, marker=:circle, label = "Station", rasterize = 5)
 end
 fig
 
+tvec = collect(0:1/S1[1].fs:length(S1[1].x)/S1[1].fs)
+tvec_date = u2d.(tvec[1:length(tvec)-1] .+ S1[1].t[1,2]*1e-6) 
+# Create the plot
+fig = Figure()
+P = Plots.plot(tvec[1:length(tvec)-1],S1[1].x)
+display(P)

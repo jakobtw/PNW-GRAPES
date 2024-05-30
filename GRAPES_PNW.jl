@@ -28,7 +28,7 @@ S13 = pull(S13_station, 1:3)
 S15 = pull(S15_station, 1:3)
 
 #Push all the channels into one
-S = SeisData(S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12)
+#S = SeisData(S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12)
 S_true = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15)
 #Source parameters for M4.6 Roosevelt, WA EQ
 origin_time = DateTime(2019, 7, 12, 9, 51, 38)
@@ -57,7 +57,7 @@ model = load_GRAPES_model() #Thank you Tim
 
 #For loop that generaltes g (GNNGraph) and predictions for each station
 for ii in 1:N
-    sample_time = origin_time + Second(ii*2)
+    sample_time = origin_time + Second(ii*3)
     g, distance_from_earthquake, lon, lat = generate_graph(
         S_true, 
         rawT, 
@@ -92,28 +92,21 @@ ga = GeoAxis(
     
 poly!(ga, state; strokewidth = 0.7, color=:green, rasterize = 5)
 
-# Extract the u property
-u_values = [pred.u[1] for pred in preds]  # adjust as needed
-
-# Normalize u_values to range [0, 1]
-normalized_preds = (u_values .- minimum(u_values)) ./ (maximum(u_values) - minimum(u_values))
-
 # Create a color map
-color_map = ColorSchemes.viridis.colors
+color_map = ColorSchemes.inferno
 
-# Map normalized_preds to colors
-colors = [color_map[clamp(floor(Int, x * (length(color_map)-1)), 1, length(color_map))] for x in normalized_preds]
-# Create a ColorMap object
-cmap = Makie.ColorMap(color_map)
+# Get the values from preds[whatever index you want to plot]
+pred_values = preds[20].ndata.x
 
-
+# Get the range of pred_values for colorrange
+pred_range = (minimum(pred_values), maximum(pred_values))
 
 #plot station data
 j = 1
 for i in 1:3:length(S_true)
     x = S_true.loc[i].lon
     y = S_true.loc[i].lat
-    Makie.scatter!(ga, x, y, color=colors[j], markersize=10, marker=:circle, label = "Station", rasterize = 5)
+    Makie.scatter!(ga, x, y, color=pred_values[j],colormap=color_map, colorrange=pred_range, markersize=10, marker=:circle, label = "Station", rasterize = 5)
     j += 1
 end
 fig

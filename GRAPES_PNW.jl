@@ -37,7 +37,7 @@ S18 = pull(S18_station, 1:3)
 
 #Push all the channels into one
 #S = SeisData(S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12)
-S_true = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18)
+S = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18)
 
 #Source parameters for M4.6 Roosevelt, WA EQ
 origin_time = DateTime(2019, 7, 12, 9, 51, 38)
@@ -69,7 +69,7 @@ lat_vals = Array{Vector{Float64}}(undef, 1)
 for ii in 1:N
     sample_time = origin_time + Second(ii*3)
     g, distance_from_earthquake, lon, lat = generate_graph(
-        S_true, 
+        S, 
         rawT, 
         predictT, 
         event_location, 
@@ -83,8 +83,9 @@ for ii in 1:N
     lon_vals = lon
     lat_vals = lat
 end
+preds
 #Index predictions like this
-preds[30]
+preds[23]
 #Validate Predictions
 vec(preds[20].ndata.x) .- vec(input_graphs[20].gdata.u)
 #Index the predictions / true values like this

@@ -111,14 +111,15 @@ pred_values = preds[25].ndata.x
 
 # Get the range of pred_values for colorrange
 pred_range = (minimum(pred_values), maximum(pred_values))
-
+cbar_p_range = [minimum(pred_values),maximum(pred_values)]
+cbar_p_labels = string.(cbar_p_range)
 #plot prediction data
 for i in 1:length(pred_values)
     x = lon_vals[i]
     y = lat_vals[i]
     Makie.scatter!(ga, x, y, color=pred_values[i],colormap=color_map, colorrange=pred_range, markersize=10, marker=:circle, label = "Station", rasterize = 5, colorbar_title = "Predicted PGA")
 end
-Makie.Colorbar(fig[1, 2], label = "Predicted PGA") #, width = Relative(0.1), height = Relative(0.8)
+Makie.Colorbar(fig[1, 2], label = "Predicted PGA", ticks = cbar_p_range, limits = cbar_p_range) #, width = Relative(0.1), height = Relative(0.8)
 fig
 
 

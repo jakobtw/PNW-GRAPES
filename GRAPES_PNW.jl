@@ -37,7 +37,7 @@ S18 = pull(S18_station, 1:3)
 
 #Push all the channels into one
 #S = SeisData(S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12)
-S_true = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19)
+S_true = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18)
 
 #Source parameters for M4.6 Roosevelt, WA EQ
 origin_time = DateTime(2019, 7, 12, 9, 51, 38)
@@ -98,7 +98,7 @@ state = GeoJSON.read(read(".\\PNW-GRAPES\\wa_state_bnd.json", String))
 # Establish the canvas for plotting
 fig = Figure()
 ga = GeoAxis(
-    fig[1, 1]; 
+    fig[1, 1], width = Relative(1), height = Relative(1.5); 
     dest = "+proj=comill", title ="GRAPES Prediction")
     
 poly!(ga, state; strokewidth = 0.7, color=:green, rasterize = 5)
@@ -116,9 +116,11 @@ pred_range = (minimum(pred_values), maximum(pred_values))
 for i in 1:length(pred_values)
     x = lon_vals[i]
     y = lat_vals[i]
-    Makie.scatter!(ga, x, y, color=pred_values[i],colormap=color_map, colorrange=pred_range, markersize=10, marker=:circle, label = "Station", rasterize = 5)
+    Makie.scatter!(ga, x, y, color=pred_values[i],colormap=color_map, colorrange=pred_range, markersize=10, marker=:circle, label = "Station", rasterize = 5, colorbar_title = "Predicted PGA")
 end
+Makie.Colorbar(fig[1, 2], label = "Predicted PGA") #, width = Relative(0.1), height = Relative(0.8)
 fig
+
 
 #Get the values from input_graphs[whatever index you want to plot]
 real_values = input_graphs[25].gdata.u
@@ -126,17 +128,16 @@ real_values = input_graphs[25].gdata.u
 # Get the range of real_values for colorrange
 real_range = (minimum(real_values), maximum(real_values))
 
-fig = Figure()
-ga = GeoAxis(
+ga2 = GeoAxis(
     fig[1, 1]; 
     dest = "+proj=comill", title ="GRAPES Real Data")
     
-poly!(ga, state; strokewidth = 0.7, color=:green, rasterize = 5)
+poly!(ga2, state; strokewidth = 0.7, color=:green, rasterize = 5)
 #plot real data
 for i in 1:length(real_values)
     x = lon_vals[i]
     y = lat_vals[i]
-    Makie.scatter!(ga, x, y, color=real_values[i],colormap=color_map, colorrange=real_range, markersize=10, marker=:circle, label = "Station", rasterize = 5)
+    Makie.scatter!(ga2, x, y, color=real_values[i],colormap=color_map, colorrange=real_range, markersize=7, marker=:circle, label = "Station", rasterize = 5, colorbar_title = "Real Data")
 end
+Makie.Colorbar(fig[1, 2], label = "Predicted PGA", width = Relative(0.1), height = Relative(0.8))
 fig
-

@@ -114,7 +114,7 @@ vec(preds[20].ndata.x) .- vec(input_graphs[20].gdata.u)
 This is predicted the 20th iteration which is about 60 seconds into our 3 minute graphs which is after the earthquake has ruptured.
 
 ### Plotting the events
-I used Makie and GeoMakie for plotting, the state JSON file was made graciously by [Steven Walters](https://environment.uw.edu/faculty/steven-walters/), Thank you so much again!
+I used Makie and GeoMakie for plotting, the state JSON file was made graciously by [Steven Walters](https://environment.uw.edu/faculty/steven-walters/), thank you so much again!
 
 I will show how to plot the prediction values:
 First you need to establish the canvas and geoaxis

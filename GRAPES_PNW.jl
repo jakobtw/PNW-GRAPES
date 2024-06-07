@@ -1,6 +1,6 @@
-using SeisIO, Dates, GRAPES, CairoMakie, GeoMakie, GeoJSON, GraphNeuralNetworks, ColorSchemes, Makie
+using SeisIO, Dates, GRAPES, CairoMakie, GeoMakie, GeoJSON, GraphNeuralNetworks, ColorSchemes, Makie, Statistics, Plots
 
-ts = "2019-07-12T09:50:30" #time start
+ts = "2019-07-12T09:51:30" #time start
 te = "2019-07-12T09:53:30" #time end
 
 
@@ -23,7 +23,6 @@ S15_station = get_data("FDSN", "UW.RVW2", src="IRIS", s=ts, t=te, detrend=true, 
 S16 = get_data("FDSN", "UW.KIMR", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 S17 = get_data("FDSN", "UW.TLW1", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 S18_station = get_data("FDSN", "UW.RATT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
-#S22 = get_data("FDSN", "UW.RAW", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 
 
 
@@ -37,7 +36,7 @@ S18 = pull(S18_station, 1:3)
 
 #Push all the channels into one
 #S = SeisData(S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12)
-S = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18)
+S = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S10,S11,S12,S14,S15,S16,S17,S18)
 
 #Remove Gain from the stations
 for i in 1:length(S)
@@ -65,23 +64,10 @@ for i in 1:length(S)
     println("After division:")
     println("First 3 x values: ", S[i].x[1:3])
 end
-isimmutable(S)
 
 S[6].gain
 S[1].x=  S[1].x ./ S[1].gain
-
-tvec = collect(0:1/S[1].fs:length(S[1].x)/S[1].fs)
-tvec_date = u2d.(tvec[1:length(tvec)-1] .+ S[1].t[1,2]*1e-6) 
-# Create the plot
-using Plots
-fig = Figure()
-for iii in 1:3:length(S)
-    P = Plots.plot(tvec[1:length(tvec)-1],S[iii].x)
-    display(P)
-end
-P = Plots.plot(tvec[1:length(tvec)-1],S[1].x)
-display(P)
-
+S[1].x
 
 
 #Source parameters for M4.6 Roosevelt, WA EQ
@@ -110,6 +96,7 @@ preds = Array{GNNGraph}(undef, N)
 model = load_GRAPES_model() #Thank you Tim
 lon_vals = Array{Vector{Float64}}(undef, 1)
 lat_vals = Array{Vector{Float64}}(undef, 1)
+
 #For loop that generaltes g (GNNGraph) and predictions for each station
 for ii in 1:N
     sample_time = origin_time + Second(ii*3)
@@ -129,73 +116,34 @@ for ii in 1:N
     lat_vals = lat
 end
 preds
+input_graphs[1].gdata.u
 #Index predictions like this
 preds[23]
 #Validate Predictions
-vec(preds[20].ndata.x) .- vec(input_graphs[20].gdata.u)
+vec(preds[8].ndata.x) .- vec(input_graphs[8].gdata.u)
 #Index the predictions / true values like this
 preds[20].ndata.x
 input_graphs[20].gdata.u
 
+#Getting the MAE of the predictions
+differences = abs.(vec(preds[8].ndata.x) .- vec(input_graphs[8].gdata.u))
+#MAE
+mae = mean(differences)
 
-# load the state boundary data given by Steven Walters
-state = GeoJSON.read(read(".\\PNW-GRAPES\\wa_state_bnd.json", String))
-
-# Establish the canvas for plotting
-fig = Figure()
-ga = GeoAxis(
-    fig[1, 1], width = Relative(1), height = Relative(1); 
-    dest = "+proj=comill", title ="GRAPES Prediction")
-
-Makie.xlims!(ga, -123, -121)
-Makie.ylims!(ga, 47, 49)    
-poly!(ga, state; strokewidth = 0.7, color=:green, rasterize = 5)
-
-# Create a color map
-color_map = ColorSchemes.inferno
-
-# Get the values from preds[whatever index you want to plot]
-pred_values = preds[23].ndata.x
-
-# Get the range of pred_values for colorrange
-pred_range = (minimum(pred_values), maximum(pred_values))
-cbar_p_range = [minimum(pred_values),maximum(pred_values)]
-cbar_p_labels = string.(cbar_p_range)
-#plot prediction data
-for i in 1:length(pred_values)
-    x = lon_vals[i]
-    y = lat_vals[i]
-    Makie.scatter!(ga, x, y, color=pred_values[i],colormap=color_map, colorrange=pred_range, markersize=15, marker=:circle, label = "Station", rasterize = 5, colorbar_title = "Predicted PGA")
-end
-Makie.scatter!(ga, -event_location.lon, event_location.lat, color=:red, markersize=20, marker=:star5, label = "Event Location", rasterize = 5)
-Makie.Colorbar(fig[1, 2], label = "Predicted PGA", ticks = cbar_p_range, limits = cbar_p_range) #, width = Relative(0.1), height = Relative(0.8)
-fig
-event_location.lon
-
-#Get the values from input_graphs[whatever index you want to plot]
-real_values = input_graphs[23].gdata.u
-
-# Get the range of real_values for colorrange
-real_range = (minimum(real_values), maximum(real_values))
-
-ga2 = GeoAxis(
-    fig[1, 2]; 
-    dest = "+proj=comill", title ="GRAPES Real Data")
-    
-poly!(ga2, state; strokewidth = 0.7, color=:green, rasterize = 5)
-Makie.xlims!(ga2, -123, -121)
-Makie.ylims!(ga2, 47, 49)  
-#plot real data
-for i in 1:length(real_values)
-    x = lon_vals[i]
-    y = lat_vals[i]
-    Makie.scatter!(ga2, x, y, color=real_values[i],colormap=color_map, colorrange=real_range, markersize=15, marker=:circle, label = "Station", rasterize = 5, colorbar_title = "Real Data")
-end
-Makie.Colorbar(fig[2, 2], label = "Predicted PGA", width = Relative(0.1), height = Relative(0.8))
-Makie.scatter!(ga2, -event_location.lon, event_location.lat, color=:red, markersize=20, marker=:star5, label = "Event Location", rasterize = 5)
-fig = Figure(padding = (5, 5, 5, 5))
-fig
-
+#Plot the predictions and true values
 include(".\\plot_grapes.jl")
 grapes_figs = plot_grapes(preds, lon_vals, lat_vals, event_location, input_graphs)
-grapes_figs[1]
+for i = 1:30
+    display(grapes_figs[i])
+end
+save("GRAPES_plot.png", grapes_figs[8])
+
+#Creating MAE plot
+mae = []
+for i = 1:30
+    differences = abs.(vec(preds[i].ndata.x) .- vec(input_graphs[i].gdata.u))
+    push!(mae, mean(differences))
+end
+p = Plots.plot(1:30, mae, xlabel="Time (s)", ylabel="Mean Absolute Error", title="Mean Absolute Error of GRAPES Predictions", label ="MAE")
+display(p)
+save("GRAPES_MAE_plot.png", p)

@@ -131,7 +131,7 @@ differences = abs.(vec(preds[8].ndata.x) .- vec(input_graphs[8].gdata.u))
 mae = mean(differences)
 
 #Plot the predictions and true values
-include(".\\plot_grapes.jl")
+include(".\\func\\plot_grapes.jl")
 grapes_figs = plot_grapes(preds, lon_vals, lat_vals, event_location, input_graphs)
 for i = 1:30
     display(grapes_figs[i])

@@ -218,15 +218,15 @@ This function creates a real vs predicited PGA plots for each time interval. It 
 
 To see the best time to compare predicted and real values, I made a chart showing the seismic signal at each station over the time. See below
 
-![alt text](Seismic_Signals_from_the_Roosevelt_Earthquake.png)
+![alt text](figures/Seismic_Signals_from_the_Roosevelt_Earthquake.png)
 
 We can see at around 23 seconds most stations are picking up a signal, so we will compare the values at 24 seconds. Using the function plot_grapes I produced this plot.
 
-![alt text](GRAPES_plot.png)
+![alt text](figures/GRAPES_plot.png)
 
 The stations seem to be over predicting and under predicting, now looking at the MAE plot:
 
-![alt text](GRAPES_MAE_plot.png)
+![alt text](figures/GRAPES_MAE_plot.png)
 
 We can see a very large MAE value at 24 seconds.
 

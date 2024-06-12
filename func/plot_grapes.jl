@@ -2,7 +2,7 @@ using Makie, GeoMakie, GeoJSON, ColorSchemes, SeisIO, Dates, GraphNeuralNetworks
 
 function plot_grapes(preds,lon_vals,lat_vals, event_location, input_graphs)
     figs = Array{Figure}(undef, 0)
-    state = GeoJSON.read(read(".\\PNW-GRAPES\\wa_state_bnd.json", String))
+    state = GeoJSON.read(read(".\\PNW-GRAPES\\figures\\wa_state_bnd.json", String))
 # Create a color map
     color_map = ColorSchemes.inferno
     for ii in eachindex(preds)

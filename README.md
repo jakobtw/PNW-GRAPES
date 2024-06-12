@@ -28,20 +28,30 @@ SeisIO documentation can be found [here.](https://seisio.readthedocs.io/en/lates
 using SeisIO
 
 # Get the start and end time in UTC for the event 
-ts = "2019-07-12T09:50:30" #time start
+ts = "2019-07-12T09:51:30" #time start
 te = "2019-07-12T09:53:30" #time end
 
-# Get the seisdata "S", downloading from FDSN, taking by a UW stations, from IRIS server
-S1 = get_data("FDSN","UW.EVGW.",src="IRIS", s=ts,t=te, detrend=false, rr=false, w= true, autoname=true)
-S2 = get_data("FDSN", "UW.LEOT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S3 = get_data("FDSN", "UW.TOLT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S4 = get_data("FDSN", "UW.QBRO", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S5 = get_data("FDSN", "UW.BEVT", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S6 = get_data("FDSN", "UW.EARN", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-S7 = get_data("FDSN", "UW.MS99", src="IRIS", s=ts, t=te, detrend=false, rr=false, w=true, autoname=true)
-# add as many stations as you can
+#Pull Data from multiple stations for single event
+S1 = get_data("FDSN","UW.EVGW.",src="IRIS", s=ts,t=te, detrend=true, rr=false, w= true, autoname=true)
+S2 = get_data("FDSN", "UW.LEOT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S3 = get_data("FDSN", "UW.TOLT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S4 = get_data("FDSN", "UW.QBRO", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S5 = get_data("FDSN", "UW.BEVT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S6 = get_data("FDSN", "UW.EARN", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S7 = get_data("FDSN", "UW.MS99", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S8 = get_data("FDSN", "UW.SWID", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S9 = get_data("FDSN", "UW.QGFY", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S10 = get_data("FDSN", "UW.MBKE", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S11 = get_data("FDSN", "UW.QKEV", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S12 = get_data("FDSN", "UW.QOCL", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S13_station = get_data("FDSN", "UW.MANO", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S14 = get_data("FDSN", "UW.OHC", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S15_station = get_data("FDSN", "UW.RVW2", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S16 = get_data("FDSN", "UW.KIMR", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S17 = get_data("FDSN", "UW.TLW1", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+S18_station = get_data("FDSN", "UW.RATT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 ```
-## If the stations use instraments you do not want to use you can extract the channels by
+## If the stations use instruments you do not want to use, you can extract the channels by
 ``` julia
 S7 = pull(S7_channels, 1:3) 
 #this is pulling the 1st 2nd and 3rd channel from an arbitrary S7_Channel
@@ -50,8 +60,42 @@ GRAPES uses multiple channels for its prediction. The more the better! I am curr
 
 ```julia
 #Push all the channels into one
-S = SeisData(S1, S2, S3, S4, S5, S6, S7) #, Sn)
+S = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S10,S11,S12,S14,S15,S16,S17,S18) #, Sn)
 ```
+
+## Data Preprocessing
+First we need to remove the gain from the signal. This comes from the transition from a physical sensor into computed values, then insure all signals are in m/s^2, so we will run the following for loop to divide the signal by its gain value and check if it is in m/s and if so take the time derivative.
+
+```julia
+#Remove Gain from the stations
+for i in 1:length(S)
+    println("Before division:")
+    println("Gain: ", S[i].gain)
+    println("First 3 x values: ", S[i].x[1:3])
+
+    newS = S[i]
+    newS.x = newS.x ./ newS.gain
+    # Create a new SeisData object with the modified x values
+    #new_S = SeisData(S[i].x ./ S[i].gain)
+
+
+    if newS.units == "m/s"
+        # Take the derivative of S[i].x
+        derivative = diff(newS.x)
+
+        # Append a zero at the end to keep the same length
+        derivative = vcat(derivative, 0) * S[i].fs
+
+        # Replace S[i].x with its derivative
+        newS.x = derivative
+    end
+    S[i] = newS
+    println("After division:")
+    println("First 3 x values: ", S[i].x[1:3])
+end
+```
+This will display values before and afer removing the gain so you can make sure it is right. The values should be to the ^-6.
+
 ## Setting up GRAPES
 Now the model needs some parameters for the event. The numbers are taken from GRAPES' test procedure.
 ```julia
@@ -106,12 +150,18 @@ end
 
 This appends values for each array we created before, the input_graph and preds are tensors with the first dimension being the number of stations, make sure these match. To validate your results this code will give us a quick way to measure the difference between GRAPES predicited value and the actual value from the Roosevelt event.
 
+## MAE Calculation
 ```julia
 #Validate Predictions
-vec(preds[20].ndata.x) .- vec(input_graphs[20].gdata.u)
+mae = []
+for i = 1:30
+    differences = abs.(vec(preds[i].ndata.x) .- vec(input_graphs[i].gdata.u))
+    push!(mae, mean(differences))
+end
 ```
+This creates an empty array "mae" for Mean Absolute Error, the loop goes through each time interval and gives you the mae to then be pushed into the array for ease of plotting.
 
-This is predicted the 20th iteration which is about 60 seconds into our 3 minute graphs which is after the earthquake has ruptured.
+
 
 ### Plotting the events
 I used Makie and GeoMakie for plotting, the state JSON file was made graciously by [Steven Walters](https://environment.uw.edu/faculty/steven-walters/), thank you so much again!
@@ -124,7 +174,8 @@ fig = figure() #creates a blank canvas
 ga = GeoAxis(
     fig[1,1], width = Relative(1), height = Relative(1.5); 
     dest = "+proj=comill", title ="GRAPES Prediction") 
-    ```
+
+```
     
 This creates our canvas and GeoAxis, the dest chooses the projection type. Now we create a polygon of the JSON file previously mentioned here
 
@@ -157,6 +208,30 @@ Makie.Colorbar(fig[1, 2], label = "Predicted PGA", ticks = cbar_p_range, limits 
 fig
 ```
 This will then give you a plot of the GRAPES predictions with a color_map of your choosing!
+
+## plot_grapes
+For ease of use I made a plot_grapes function, it needs `preds`, `lon_vals`, `lat_vals`, `event_location`, and `input_graphs`. These all should be made already if following my steps / repository.
+
+This function creates a real vs predicited PGA plots for each time interval. It is all pushed onto an array `grapes_figs`.
+
+## Results
+
+To see the best time to compare predicted and real values, I made a chart showing the seismic signal at each station over the time. See below
+
+![alt text](Seismic_Signals_from_the_Roosevelt_Earthquake.png)
+
+We can see at around 23 seconds most stations are picking up a signal, so we will compare the values at 24 seconds. Using the function plot_grapes I produced this plot.
+
+![alt text](GRAPES_plot.png)
+
+The stations seem to be over predicting and under predicting, now looking at the MAE plot:
+
+![alt text](GRAPES_MAE_plot.png)
+
+We can see a very large MAE value at 24 seconds.
+
+## Conclusions
+There is still much work to be done on this model! GRAPES requires a high station count to allow more neighbors in the set up of the model. With preprocessing already set up and put into a function with a little more time and adding more stations I predict there would be better more accurate results. Over the summer I will update this repository with many more channels and I assume there will be a much nicer, more accurate prediction being made by GRAPES.
 
 Many thanks to Timothy Clements and Steven Walters for their contributions to my project and thank you to Marine Denolle for advising me and helping me with this throughout the quarter!
 

@@ -231,7 +231,7 @@ The stations seem to be over predicting and under predicting, now looking at the
 We can see a very large MAE value at 24 seconds.
 
 ## Conclusions
-There is still much work to be done on this model! GRAPES requires a high station count to allow more neighbors in the set up of the model. With preprocessing already set up and put into a function with a little more time and adding more stations I predict there would be better more accurate results. Over the summer I will update this repository with many more channels and I assume there will be a much nicer, more accurate prediction being made by GRAPES.
+There is still much work to be done on this model! GRAPES requires a high station count to allow more neighbors in the set up of the model. With preprocessing already set up and put into a function with a little more time and adding more stations I predict there would be better, more accurate results. Over the summer I will update this repository with many more channels and I assume there will be a much nicer, more accurate prediction being made by GRAPES.
 
 Many thanks to Timothy Clements and Steven Walters for their contributions to my project and thank you to Marine Denolle for advising me and helping me with this throughout the quarter!
 

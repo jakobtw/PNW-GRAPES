@@ -20,7 +20,7 @@ S12_station = get_data("FDSN", "UW.MANO", src="IRIS", s=ts, t=te, detrend=true, 
 S13 = get_data("FDSN", "UW.OHC", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 S14_station = get_data("FDSN", "UW.RVW2", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 S15 = get_data("FDSN", "UW.KIMR", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
-S16 = get_data("FDSN", "UW.TLW1", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
+#S16 = get_data("FDSN", "UW.TLW1", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 S17_station = get_data("FDSN", "UW.RATT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 S18 = get_data("FDSN", "UW.QNWT", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
 S19 = get_data("FDSN", "UW.QSNZ", src="IRIS", s=ts, t=te, detrend=true, rr=false, w=true, autoname=true)
@@ -51,7 +51,7 @@ S17 = pull(S17_station, 1:3)
 
 #Push all the channels into one
 #S = SeisData(S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12)
-S = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S10,S11,S12,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31)
+S = SeisData(S1,S2,S3,S4,S5,S6,S7,S8,S10,S11,S12,S14,S15,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31)
 
 #Remove Gain from the stations
 for i in 1:length(S)

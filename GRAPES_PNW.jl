@@ -43,12 +43,7 @@ S31 = get_data("FDSN", "UW.ALCT", src="IRIS", s=ts, t=te, detrend=true, rr=false
 
 
 
-
-
-display(S13_station)
-
-
-#Prune the stations with too many channels for just first 3
+#Prune the stations with too many channels for just first 3, this is to keep the signal in the same formats
 S12 = pull(S12_station, 1:3)
 S14 = pull(S14_station, 1:3)
 S17 = pull(S17_station, 1:3)

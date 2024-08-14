@@ -224,14 +224,16 @@ We can see at around 23 seconds most stations are picking up a signal, so we wil
 
 ![alt text](figures/GRAPES_plot.png)
 
-The stations seem to be over predicting and under predicting, now looking at the MAE plot:
+The station predictions seem to be generally underpredicting. 
 
 ![alt text](figures/GRAPES_MAE_plot.png)
 
-We can see a very large MAE value at 24 seconds.
+The MAE value is around 0.4, this is rather good for the small number of channels we are using!
 
 ## Conclusions
-There is still much work to be done on this model! GRAPES requires a high station count to allow more neighbors in the set up of the model. With preprocessing already set up and put into a function with a little more time and adding more stations I predict there would be better, more accurate results. Over the summer I will update this repository with many more channels and I assume there will be a much nicer, more accurate prediction being made by GRAPES.
+GRAPES has the potential to become a highly accurate and powerful earthquake early warning model. Currently, with just around 30 stations, the system delivers impressive results. Washington's existing infrastructure offers an opportunity to expand the number of channels, which would further enhance the model's predictive accuracy.
+
+The success of GRAPES with data from regions like Japan, Italy, and California demonstrates its broad applicability, particularly when it benefits from a high density of monitoring stations. Given more time, I aim to analyze peak seismic amplitudes in relation to station predictions and develop a comprehensive map of ground motion around each station. This map would be invaluable for assessing risk factors and improving preparedness for areas vulnerable to significant seismic events.
 
 Many thanks to Timothy Clements and Steven Walters for their contributions to my project and thank you to Marine Denolle for advising me and helping me with this throughout the quarter!
 
